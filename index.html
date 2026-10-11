@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://*.supabase.co wss://*.supabase.co; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#fff2f6">
+<meta name="description" content="A private doodle space for two.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>TwoHearts — private doodles</title>
+<style>
+:root{--pink:#e75b83;--pale:#fff2f6;--ink:#3a2630;--muted:#806c75;--line:#f0d5df}
+*{box-sizing:border-box}body{margin:0;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:linear-gradient(145deg,#fff2f6,#fff 58%,#f6f0ff);min-height:100vh}
+main{max-width:760px;margin:auto;padding:20px 14px 36px}.top{text-align:center;padding:8px 0 14px}.heart{font-size:34px}.top h1{margin:0;font-size:27px}.top p{margin:7px 0;color:var(--muted)}
+.panel{background:#ffffffdf;border:1px solid var(--line);border-radius:20px;padding:15px;margin:12px 0;box-shadow:0 8px 26px #a04a6810}
+label{display:block;font-weight:650;font-size:13px;margin:9px 0 5px}input,button,select{font:inherit}input[type=text],input[type=password]{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;color:var(--ink)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row>*{flex:1}.btn{border:0;border-radius:12px;padding:11px 13px;font-weight:700;cursor:pointer;background:var(--pink);color:white}.btn.secondary{background:var(--pale);color:var(--ink);border:1px solid var(--line)}.btn:disabled{opacity:.5;cursor:not-allowed}
+#canvas{display:block;width:100%;height:340px;touch-action:none;background:#fff;border:1px solid var(--line);border-radius:15px;cursor:crosshair}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0}.tools label{margin:0}.tools input[type=color]{width:42px;height:38px;border:0;background:transparent}.tools input[type=range]{width:110px}
+.status{font-size:13px;color:var(--muted);line-height:1.5}.status strong{color:var(--ink)}.small{font-size:12px;color:var(--muted);line-height:1.5}.notice{background:#fff8e8;border:1px solid #f1dfb1;border-radius:12px;padding:11px;font-size:13px;line-height:1.5}
+#sharelink{font-size:12px;word-break:break-all;background:#faf7fa;padding:9px;border-radius:9px;min-height:36px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:14px}
+@media(min-width:600px){#canvas{height:400px}}
+</style>
+</head>
+<body>
+<main>
+  <header class="top"><div class="heart">💗</div><h1>TwoHearts</h1><p>Your little private corner for doodles.</p></header>
+  <section class="panel">
+    <div class="status" id="status"><strong>Not connected yet.</strong> Create a private room, then connect a free sync service.</div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="newRoom">Create private room</button>
+      <button class="btn secondary" id="copyInvite" disabled>Copy invite link</button>
+    </div>
+    <label>Invite link (keep it private)</label><div id="sharelink">Create a room to make a link.</div>
+    <p class="small">The secret encryption key sits after the # in the invite link. Only share this link with your partner.</p>
+  </section>
+  <section class="panel">
+    <div class="tools">
+      <label>Ink <input id="color" type="color" value="#e75b83" aria-label="Ink colour"></label>
+      <label>Size <input id="size" type="range" min="2" max="16" value="5" aria-label="Brush size"></label>
+      <button class="btn secondary" id="erase">Eraser</button>
+      <button class="btn secondary" id="clear">Clear canvas</button>
+    </div>
+    <canvas id="canvas" aria-label="Shared drawing canvas"></canvas>
+    <div class="row" style="margin-top:10px">
+      <button class="btn secondary" id="save">Save drawing image</button>
+      <button class="btn secondary" id="sendTest">Test encryption</button>
+    </div>
+    <p class="small">Drawings are encrypted on this device before syncing. Until you connect sync, the canvas works locally only.</p>
+  </section>
+  <section class="panel">
+    <h3 style="margin:0 0 5px">Connect free syncing</h3>
+    <p class="small">Supabase only relays encrypted messages. Its free tier has usage limits and can pause inactive projects. Never enter a service-role or secret key here.</p>
+    <label for="supabaseUrl">Supabase project URL</label><input id="supabaseUrl" type="text" placeholder="https://your-project.supabase.co" autocomplete="off">
+    <label for="supabaseKey">Supabase anon / publishable key</label><input id="supabaseKey" type="password" placeholder="Public anon/publishable key only" autocomplete="off">
+    <div class="row"><button class="btn" id="connect">Connect sync</button><button class="btn secondary" id="disconnect">Disconnect</button></div>
+    <p class="small">The project URL is remembered in this browser. The key is not stored; you enter it again after reopening the app. Setup steps are in README.md.</p>
+  </section>
+  <section class="panel">
+    <div class="notice"><strong>Privacy note:</strong> this is an early prototype, not a security-audited messenger. Drawings are encrypted with AES-GCM in your browser, but the app itself must be served from a source you trust, over HTTPS. Don't use it for sensitive secrets.</div>
+  </section>
+  <footer>Made for two people, not for tracking. 💞</footer>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
