@@ -1,0 +1,5 @@
+[build]
+  # Build from the repository root. This overrides the "Base directory" UI setting,
+  # which pointed at a folder ("Chrome") that does not exist in this repo.
+  base = "/"
+  publish = "/"
